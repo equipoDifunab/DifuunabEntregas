@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+.sidebar-container {
+    width: 250px; /* Ancho fijo del Sidebar */
+    height: 100vh; /* Altura completa de la ventana */
+    background-color: white; /* Fondo blanco */
+    border-right: 1px solid #e5e7eb; /* Borde derecho */
+    display: flex;
+    flex-direction: column; /* Asegura que los elementos internos se apilen verticalmente */
+    padding: 1rem; /* Espaciado interno */
+    box-sizing: border-box; /* Incluye padding y border en el tamaño total */
+    overflow-y: auto; /* Permite desplazamiento si el contenido es largo */
+}
