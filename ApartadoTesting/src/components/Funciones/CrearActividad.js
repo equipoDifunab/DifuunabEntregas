@@ -49,7 +49,7 @@ export function useCrearActividad() {
         throw new Error(errorData.error || 'Error al crear actividad');
       }
 
-      navigate('/actividades');
+      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {

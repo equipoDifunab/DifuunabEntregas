@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import actividadesRoutes from './routes/EndPointActividades.js';
+import usuarioRoutes from './routes/UsuarioRoutes.js';
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/actividades', actividadesRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 
 // Manejo de errores (opcional)
 app.use((err, req, res) => {

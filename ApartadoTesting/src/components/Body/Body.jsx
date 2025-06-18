@@ -8,10 +8,6 @@ function Body() {
   const [actividades, setActividades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [inscripcionActiva, setInscripcionActiva] = useState(null);
-  const [formData, setFormData] = useState({ nombre: '', email: '' });
-  const [inscripcionError, setInscripcionError] = useState(null);
-  const [inscripcionExitosa, setInscripcionExitosa] = useState(false);
 
   const fetchActividades = async () => {
     try {
@@ -31,43 +27,24 @@ function Body() {
   }, []);
 
   const handleInscripcion = async (actividadId) => {
-    setInscripcionActiva(actividadId);
-    setInscripcionError(null);
-    setInscripcionExitosa(false);
-  };
-
-  const handleSubmitInscripcion = async (e) => {
-    e.preventDefault();
-    setInscripcionError(null);
-
     try {
-      const response = await fetch(`http://localhost:3001/api/actividades/${inscripcionActiva}/inscripcion`, {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3001/api/actividades/${actividadId}/inscripcion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({}) // Ya no se envían datos de usuario
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
 
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-
-      // Guardar el email del usuario para futuras referencias
-      localStorage.setItem('userEmail', formData.email);
-
-      setInscripcionExitosa(true);
-      setFormData({ nombre: '', email: '' });
-      fetchActividades(); // Actualizar la lista de actividades
-      setTimeout(() => {
-        setInscripcionActiva(null);
-        setInscripcionExitosa(false);
-      }, 2000);
-
+      fetchActividades(); // Actualizar cupos
+      alert("¡Inscripción exitosa!");
     } catch (err) {
-      setInscripcionError(err.message);
+      alert("Error al inscribirse: " + err.message);
     }
   };
 
@@ -88,76 +65,11 @@ function Body() {
         </button>
       </div>
 
-      {/* Modal de Inscripción */}
-      {inscripcionActiva && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Inscripción a la Actividad</h2>
-            
-            {inscripcionExitosa ? (
-              <div className="text-green-600 text-center py-4">
-                ¡Inscripción realizada con éxito!
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitInscripcion} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre completo
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.nombre}
-                    onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-
-                {inscripcionError && (
-                  <div className="text-red-500 text-sm py-2">
-                    {inscripcionError}
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setInscripcionActiva(null)}
-                    className="px-4 py-2 text-sm border rounded-md hover:bg-gray-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Confirmar Inscripción
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Tarjetas */}
       <div className="grid gap-6 md:grid-cols-2">
         {actividades.map((actividad) => (
           <div key={actividad._id} className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            {/* Header con botón de edición */}
+            {/* Header */}
             <div className="p-4 border-b flex justify-between items-start">
               <div>
                 <h2 className="text-lg font-semibold">{actividad.nombre}</h2>

@@ -2,11 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Actividad from '../Models/Actividad.js';
 import { crearActividad, obtenerActividades } from '../controllers/actividadesController.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Crear nueva actividad
-router.post('/', crearActividad);
+// Solo coordinadores pueden crear actividades
+router.post('/', requireAuth, requireRole('coordinador'), crearActividad);
 
 // Obtener todas las actividades
 router.get('/', obtenerActividades);
@@ -32,8 +33,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Actualizar una actividad por ID
-router.put('/:id', async (req, res) => {
+// Actualizar una actividad por ID (solo coordinador)
+router.put('/:id', requireAuth, requireRole('coordinador'), async (req, res) => {
   const { id } = req.params;
 
   // Validar si el ID es un ObjectId válido
@@ -59,15 +60,29 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Inscribirse en una actividad
-router.post('/:id/inscripcion', async (req, res) => {
+// Eliminar una actividad por ID (solo coordinador)
+router.delete('/:id', requireAuth, requireRole('coordinador'), async (req, res) => {
   const { id } = req.params;
-  const { nombre, email } = req.body;
 
-  // Validar datos requeridos
-  if (!nombre || !email) {
-    return res.status(400).json({ error: 'Nombre y email son requeridos' });
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'ID de actividad no válido' });
   }
+
+  try {
+    const actividadEliminada = await Actividad.findByIdAndDelete(id);
+    if (!actividadEliminada) {
+      return res.status(404).json({ error: 'Actividad no encontrada' });
+    }
+    res.json({ mensaje: 'Actividad eliminada correctamente' });
+  } catch (err) {
+    console.error('Error al eliminar actividad:', err);
+    res.status(500).json({ error: 'Error al eliminar actividad' });
+  }
+});
+
+// Solo tutores pueden inscribirse
+router.post('/:id/inscripcion', requireAuth, requireRole('tutor'), async (req, res) => {
+  const { id } = req.params;
 
   // Validar si el ID es válido
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -75,9 +90,8 @@ router.post('/:id/inscripcion', async (req, res) => {
   }
 
   try {
-    // Buscar la actividad y verificar cupos disponibles
     const actividad = await Actividad.findById(id);
-    
+
     if (!actividad) {
       return res.status(404).json({ error: 'Actividad no encontrada' });
     }
@@ -87,16 +101,9 @@ router.post('/:id/inscripcion', async (req, res) => {
       return res.status(400).json({ error: 'No hay cupos disponibles' });
     }
 
-    // Verificar si el participante ya está inscrito
-    const yaInscrito = actividad.participantes.some(p => p.email === email);
-    if (yaInscrito) {
-      return res.status(400).json({ error: 'Ya estás inscrito en esta actividad' });
-    }
+    // Agregar inscripción 
+    actividad.participantes.push({});
 
-    // Agregar participante y actualizar cupos
-    actividad.participantes.push({ nombre, email });
-    
-    // Guardar los cambios
     await actividad.save();
 
     res.status(200).json({
@@ -111,3 +118,4 @@ router.post('/:id/inscripcion', async (req, res) => {
 });
 
 export default router;
+

@@ -1,4 +1,4 @@
-// src/components/EditarActividad.jsx
+
 import { CalendarIcon } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useEditarActividad } from '../Funciones/EditarActividad.js';
@@ -73,8 +73,10 @@ export function EditarActividad() {
               className="w-full p-2 border rounded"
             >
               <option value="">Seleccionar...</option>
-              <option value="CharlaEnFeria">CharlaEnFeria</option>
-              <option value="ciencias">Ciencias</option>
+              <option value="Ferias Universitarias">Ferias Universitarias</option>
+              <option value="Charlas Universitarias">Charlas Universitarias</option>
+              <option value="Evaluacion Ensaño PAES">Evaluacion Ensaño PAES</option>
+              <option value="Voluntariados">Voluntariados</option>
             </select>
           </div>
         </div>

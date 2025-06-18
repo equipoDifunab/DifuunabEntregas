@@ -1,4 +1,4 @@
-// src/hooks/EditarActividad.js
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -65,7 +65,7 @@ export function useEditarActividad(id) {
         throw new Error(errorData.error || 'Error al actualizar');
       }
 
-      navigate('/actividades', { state: { success: 'Actividad actualizada' } });
+      navigate('/', { state: { success: 'Actividad actualizada' } });
     } catch (err) {
       setError(err.message);
     }
