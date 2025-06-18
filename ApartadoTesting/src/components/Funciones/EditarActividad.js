@@ -50,10 +50,16 @@ export function useEditarActividad(id) {
       if (formData.horaInicio >= formData.horaFin) {
         throw new Error('La hora final debe ser posterior a la inicial');
       }
-
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No estás autenticado. Por favor, inicia sesión.');
+      }
       const response = await fetch(`http://localhost:3001/api/actividades/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },       
         body: JSON.stringify({
           ...formData,
           cupos: Number(formData.cupos) // Asegurar que es número

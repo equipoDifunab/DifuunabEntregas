@@ -37,10 +37,18 @@ export function useCrearActividad() {
         fecha: date || new Date(),
         cupos: Number(formData.cupos),
       };
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No estás autenticado. Por favor, inicia sesión.');
+      }
 
       const response = await fetch('http://localhost:3001/api/actividades', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {           
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+         }, // Incluye el token en la cabecera,
         body: JSON.stringify(dataToSubmit),
       });
 
